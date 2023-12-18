@@ -162,6 +162,12 @@ Int_t StFemtoDstMaker::Make() {
 	cent = mtCent->GetCentrality9(refMult3);
 	if (cent <0 || cent >= 9) { return kStOK; }
 
+	// check DCA
+	if (!mtDca->Make(mPicoDst)) { return kStOK; }
+	if (mtDca->IsBadMeanDcaZEvent(mPicoDst) || mtDca->IsBadMeanDcaXYEvent(mPicoDst)) {
+		return kStOK;
+	}
+
 	// track loop
 	for (Int_t i = 0; i < nTracks; i++){
 		StPicoTrack *mPicoTrack = mPicoDst->track(i);

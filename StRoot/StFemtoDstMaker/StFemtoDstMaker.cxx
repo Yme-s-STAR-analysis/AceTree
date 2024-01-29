@@ -78,6 +78,8 @@ Int_t StFemtoDstMaker::Init(){
 	mtCent->SetDoBetaPileUp(true);
 	mtCent->SetDoLumi(false);
 	mtCent->SetDoVz(true);
+	mtCent->SetDoLumiX(false);
+	mtCent->SetDoVzX(true);
 	mtCent->ReadParams();
 
 	// CFMult tool

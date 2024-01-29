@@ -6,13 +6,14 @@ ClassImp(StFemtoEvent)
 
 //____________________________________________________________
 StFemtoEvent::StFemtoEvent(): TObject(),
-	mRefMult3(-999), mVz(-999), mVr(-999) {
+	mRefMult3(-999), mRefMult3X(-999), mVz(-999), mVr(-999) {
 }
 
 //____________________________________________________________
 StFemtoEvent::StFemtoEvent(const StFemtoEvent &event): TObject() {
 
   mRefMult3 = event.mRefMult3;
+  mRefMult3X = event.mRefMult3X;
 
   mVz = event.mVz;
   mVr = event.mVr;
@@ -23,6 +24,7 @@ StFemtoEvent::StFemtoEvent(const StFemtoEvent &event): TObject() {
 //____________________________________________________________
 void StFemtoEvent::ClearEvent() {
 	mRefMult3 = -999;
+	mRefMult3X= -999;
 
 	mVz = -999;
 	mVr = -999;

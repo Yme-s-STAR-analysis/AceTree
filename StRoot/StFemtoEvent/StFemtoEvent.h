@@ -30,6 +30,7 @@ class StFemtoEvent : public TObject {
 
 		// Getters
 		Int_t GetRefMult3()			{		return mRefMult3;			}
+		Int_t GetRefMult3X()		{		return mRefMult3X;			}
 		Float_t GetVz()				{		return (Float_t) mVz;		}
 		Float_t GetVr()				{		return (Float_t) mVr;		}
 		Int_t GetRunId()			{		return mRunId;				}
@@ -37,6 +38,7 @@ class StFemtoEvent : public TObject {
 		// Setters
 
 		void SetRefMult3(Int_t val) {		mRefMult3 = val;			}
+		void SetRefMult3X(Int_t val){		mRefMult3X= val;			}
 		void SetVz(Float_t val)   	{ 		mVz  = val;					}
 		void SetVr(Float_t val)   	{		mVr  = val;					}
 		void SetRunId(Float_t val)  { 		mRunId  = val;				}
@@ -50,6 +52,7 @@ class StFemtoEvent : public TObject {
 	private:
 
 		Int_t   mRefMult3;
+		Int_t   mRefMult3X;
 		Float_t mVz;
 		Float_t mVr;
 		std::vector< StFemtoTrack>  mFemtoTrackArray;

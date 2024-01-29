@@ -158,7 +158,14 @@ Int_t StFemtoDstMaker::Make() {
 		refMult, refMult3, nTofMatch, nTofBeta,
 		0, vz, trgid
 	);
+	Int_t refMult3X = mtMult->mRefMult3X;
+	refMult3X = mtCent->GetRefMult3Corr(
+		refMult, refMult3X, nTofMatch, nTofBeta,
+		0, vz, trgid, true
+	);
+
 	if (refMult3 < 0) { return kStOK; }
+	if (refMult3X < 0) { return kStOK; }
 	cent = mtCent->GetCentrality9(refMult3);
 	if (cent <0 || cent >= 9) { return kStOK; }
 
@@ -273,6 +280,7 @@ Int_t StFemtoDstMaker::Make() {
 	// Fill Event Varialbles
 
 	mFemtoEvent->SetRefMult3(refMult3);
+	mFemtoEvent->SetRefMult3X(refMult3X);
 	mFemtoEvent->SetVz(vz);
 	mFemtoEvent->SetVr(vr);
 	mFemtoEvent->SetRunId(runId);

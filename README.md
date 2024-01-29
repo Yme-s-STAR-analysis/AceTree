@@ -2,11 +2,11 @@
 
 ## Standard Tree
 
-Version: 4.0.1
+Version: 4.1
 
 Author: yghuang
 
-Date: 18.12.2023
+Date: 29.12.2024
 
 ## Notification
 
@@ -71,6 +71,10 @@ The `maxFilesPerProcess` argument in `Csubmit.xml` can be changed if you want.
 If you are prety sure about your file list, (I mean all the files there are valid and accessible), `star-submit -u ie Csubmit.xml` is better than a simple `star-submit Csubmit.xml`.
 
 ## Change Log
+
+29.01.2024 by yghuang (v4.1):
+
+> New centrality definition package and RefMult3X in use.
 
 18.12.2023 by yghuang (v4.0.1):
 

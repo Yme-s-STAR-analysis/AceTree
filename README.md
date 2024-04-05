@@ -2,11 +2,11 @@
 
 ## Standard Tree
 
-Version: 4.1
+Version: 4.2
 
 Author: yghuang
 
-Date: 29.12.2024
+Date: 05.04.2024
 
 ## Notification
 
@@ -71,6 +71,22 @@ The `maxFilesPerProcess` argument in `Csubmit.xml` can be changed if you want.
 If you are prety sure about your file list, (I mean all the files there are valid and accessible), `star-submit -u ie Csubmit.xml` is better than a simple `star-submit Csubmit.xml`.
 
 ## Change Log
+
+05.04.2024 by yghuang (v4.2):
+
+> Update: support modules:
+>
+>> TpcShiftTool: v2.1.1, support Ashish's shift format
+>>
+>> StCFMult: v2.2.1, support latest TpcShiftTool and new definitions of multiplicities
+>>
+>> MeanDcaCut: v2.1.1, load parameters from header file
+>>
+>> CentCorrTool: v6.1, using Indian method and parameters
+>>
+> And interfaces are changed accordingly
+>
+> Cuts are tighter for saving storage
 
 29.01.2024 by yghuang (v4.1):
 

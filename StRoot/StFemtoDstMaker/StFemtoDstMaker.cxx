@@ -68,25 +68,14 @@ Int_t StFemtoDstMaker::Init(){
 	mtTofT0 = new TofT0Correction();
 
 	// mean dca tool setup
-	mtDca->SetUpperCurveParZ(-0.0531713, 1.71842, 0.465328);
-	mtDca->SetLowerCurveParZ(0.0532244, -1.72135, 0.464709);
-	mtDca->SetUpperCurveParXY(0.045491, 2.14648, 0.558145);
-	mtDca->SetLowerCurveParXY(-0.102939, -2.14641, 0.54303);
+	mtDca->ReadParams();
 
 	// centrality tool
-	mtCent->SetDoMatchPileUp(true);
-	mtCent->SetDoBetaPileUp(true);
-	mtCent->SetDoLumi(false);
-	mtCent->SetDoVz(true);
-	mtCent->SetDoLumiX(false);
-	mtCent->SetDoVzX(true);
+	mtCent->EnableIndianMethod(true);
 	mtCent->ReadParams();
 
-	// CFMult tool
-	mtShift->Init(
-		"/star/u/yghuang/Work/DataAnalysis/BES2/14p6/yqa/ShiftFile/14GeV.shift.root",
-		"ProtonShift1D", "ProtonShift2D"
-	);
+	// Multiplicity and shift tool
+	mtShift->Init();
 	mtMult->ImportShiftTool(mtShift);
 
 	// eTOF t0 correction
@@ -130,12 +119,18 @@ Int_t StFemtoDstMaker::Make() {
 	Float_t vy = event->primaryVertex().Y();
 	Float_t vz = event->primaryVertex().Z();
 
-	// wide vertex cut
+	// new: using Ashish's shifted vr cut
+	// one can find vertex shift information here:
+	// -> https://drupal.star.bnl.gov/STAR/system/files/Vr_xy_N_Vzcut.txt
+	vx = vx - 0.0417;
+	vy = vy + 0.2715;
+
+	// wide vertex cut -> tight cut now
 	if (fabs(vz) > 50) {
 		return kStOK;
 	}
 	Float_t vr = TMath::Sqrt(vx * vx + vy * vy);
-	if (vr > 2) {
+	if (vr > 1) { // shifted vr < 1
 		return kStOK;
 	}
 
@@ -152,24 +147,33 @@ Int_t StFemtoDstMaker::Make() {
 	// centrality
 	mtMult->make(mPicoDst);
 	Int_t refMult = mtMult->mRefMult;
+	Int_t tofMult = mtMult->mTofMult;
 	Int_t nTofMatch = mtMult->mNTofMatch;
 	Int_t nTofBeta = mtMult->mNTofBeta;
 
 	Int_t refMult3 = mtMult->mRefMult3;
-	refMult3 = mtCent->GetRefMult3Corr(
-		refMult, refMult3, nTofMatch, nTofBeta,
-		0, vz, trgid
+	// refMult3 = mtCent->GetRefMult3Corr(
+	// 	refMult, refMult3, nTofMatch, nTofBeta,
+	// 	0, vz, trgid
+	// );
+	refMult3 = mtCent->GetIndianRefMult3Corr(
+		refMult, refMult3, tofMult, nTofMatch, nTofBeta,
+		vz, false
 	);
 	Int_t refMult3X = mtMult->mRefMult3X;
-	refMult3X = mtCent->GetRefMult3Corr(
-		refMult, refMult3X, nTofMatch, nTofBeta,
-		0, vz, trgid, true
+	refMult3X = mtCent->GetIndianRefMult3Corr(
+		refMult, refMult3X, tofMult, nTofMatch, nTofBeta,
+		vz, true
 	);
+	// refMult3X = mtCent->GetRefMult3Corr(
+	// 	refMult, refMult3X, nTofMatch, nTofBeta,
+	// 	0, vz, trgid, true
+	// );
 
 	if (refMult3 < 0) { return kStOK; }
 	if (refMult3X < 0) { return kStOK; }
 	cent = mtCent->GetCentrality9(refMult3);
-	if (cent <0 || cent >= 9) { return kStOK; }
+	if (cent < 0 && centX < 0) { return kStOK; } // only skip this event when both of them are invalid
 
 	// check DCA
 	if (!mtDca->Make(mPicoDst)) { return kStOK; }
@@ -180,50 +184,31 @@ Int_t StFemtoDstMaker::Make() {
 	// track loop
 	for (Int_t i = 0; i < nTracks; i++){
 		StPicoTrack *mPicoTrack = mPicoDst->track(i);
-		if (!mPicoTrack){
-			continue;
-		}
-		if (!mPicoTrack->isPrimary()){
-			continue;
-		}
+		if (!mPicoTrack) { continue; }
+		if (!mPicoTrack->isPrimary()){ continue; }
 		TVector3 momentum = mPicoTrack->pMom();
 		Float_t dca = fabs(mPicoTrack->gDCA(vx, vy, vz));
-		if (dca > 2){
-			continue;
-		}
+		if (dca > 1.6){ continue; }
 		Float_t nHitsFit = mPicoTrack->nHitsFit();
 		Float_t nHitsMax = mPicoTrack->nHitsMax();
 		Float_t nHitsDedx = mPicoTrack->nHitsDedx();
 
-		if (nHitsDedx < 5){
-			continue;
-		}
-		if (nHitsFit < 10){
-			continue;
-		}
-		if ((nHitsFit / nHitsMax) < 0.52){
-			continue;
-		}
+		if (nHitsDedx < 5) { continue; }
+		if (nHitsFit < 14){ continue; }
+		if ((nHitsFit / nHitsMax) < 0.52){ continue; }
 
 		Float_t q = mPicoTrack->charge();
 		Float_t pz = momentum.Z();
 		Float_t pt = momentum.Perp();
 		Float_t pcm = momentum.Mag();
-		if (pt < 0.2 || pt > 2){
-			continue;
-		}
+		Float_t eta = momentum.PseudoRapidity();
+		if (pt < 0.3 || pt > 2){ continue; }
 
 		Float_t EP = sqrt(pcm * pcm + 0.938272 * 0.938272);
 		Float_t YP = TMath::Log((EP + pz) / (EP - pz)) * 0.5;
 		double nSigProton = mPicoTrack->nSigmaProton();
-        if (0.4 < pt && pt < 2.0 && fabs(YP) < 0.5) {
-            nSigProton -= mtShift->GetShift(pt, YP);
-        } else {
-            nSigProton -= mtShift->GetShift(pcm);
-        }
-		if (fabs(nSigProton) >= 3){
-			continue;
-		}
+		nSigProton -= mtShift->GetShift(runId, pt, eta);
+		if (fabs(nSigProton) > 2.6){ continue; }
 
 		Float_t mass2 = -999;
 

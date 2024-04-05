@@ -139,6 +139,7 @@ Int_t StFemtoDstMaker::Make() {
 
 	Int_t nTracks = mPicoDst->numberOfTracks();
 	Int_t cent = -1;
+	Int_t centX = -1;
 
 	// check trigger ID
 	Int_t trgid = mtTrg->GetTriggerID(event);
@@ -173,6 +174,7 @@ Int_t StFemtoDstMaker::Make() {
 	if (refMult3 < 0) { return kStOK; }
 	if (refMult3X < 0) { return kStOK; }
 	cent = mtCent->GetCentrality9(refMult3);
+	centX = mtCent->GetCentrality9(refMult3X, true);
 	if (cent < 0 && centX < 0) { return kStOK; } // only skip this event when both of them are invalid
 
 	// check DCA

@@ -71,6 +71,9 @@ The `maxFilesPerProcess` argument in `Csubmit.xml` can be changed if you want.
 If you are prety sure about your file list, (I mean all the files there are valid and accessible), `star-submit -u ie Csubmit.xml` is better than a simple `star-submit Csubmit.xml`.
 
 ## Change Log
+o07.04.2024 by yghuang (v4.3):
+
+> Now using git submodule
 
 05.04.2024 by yghuang (v4.2):
 

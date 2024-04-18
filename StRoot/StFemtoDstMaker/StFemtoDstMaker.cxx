@@ -192,7 +192,7 @@ Int_t StFemtoDstMaker::Make() {
 		if (!mPicoTrack->isPrimary()){ continue; }
 		TVector3 momentum = mPicoTrack->pMom();
 		// Float_t dca = fabs(mPicoTrack->gDCA(vx, vy, vz));
-		StPicoPhysicalHelix helix = picoTrack->helix(mField);
+		StPicoPhysicalHelix helix = mPicoTrack->helix(mField);
 		Double_t dca = fabs(helix.geometricSignedDistance(pVtx));
 		if (dca > 1.3){ continue; }
 		Float_t nHitsFit = mPicoTrack->nHitsFit();

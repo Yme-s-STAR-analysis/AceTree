@@ -1,77 +1,32 @@
-# Ace Tree Base User's Guide
+# Ace Tree
 
-## Standard Tree
-
-Version: 4.2
+Version: 4.4
 
 Author: yghuang
 
-Date: 05.04.2024
-
-## Notification
+## Users' Guide
 
 What do you need to modify when dealing with a new data set:
 
 1. replace `StRoot/CentCorrTool/CentParams.h` with the very data set
 
-2. replace the trigger numbers in `StRoot/TriggrtTool/TriggerTool.h` 
+2. change the MB trigger numbers in `StRoot/TriggrtTool/TriggerTool.cxx`
 
-3. there are some initialization in `StFemtoDstMaker::Init()`, including:
+3. fill in the correct value of mean dca xyz cut in `StRoot/MeanDcaTool/MeanDcaParams.h`
 
->> mean dca tool parameters
->>
->> n sigma shift tool root file path
->>
->> TOF t0 offset (if necessary)
+4. change TPC n sigma shift root file and run number mapping file in `StRoot/TpcShiftTool/MakeRunNumberHeader.py` and run that script, or you can directly replace the `RunNumber.h` with pre-generated one
 
-## New features
+5. in `StRoot/StFemtoDstMaker/StFemtoDstMaker.cxx`, change TOF t0 offset (if necessary)
 
-> Modulized design, DCA cut, RefMult3 counting and centrality spliting, simplified usage!
+## Patch Note
 
-## What is Ace Tree based fDst?
+18.04.2024 by yghuang (v4.4):
 
-To use a highly efficient coding logic to speed up the fDst generating.
+> Updated bTOF beta and mass2 calculation
+>
+> And with latest `StCFMult` v2.3 (which is also updating bTOF beta and mass2)
 
-To prepare high-quality fDst for cumulants calculating.
-
-Once generated, use it everywhere.
-
-Easy to modify and deploy.
-
-## Quick Start!
-
-Firstly, prepare your target directory, like: `mkdir $SOME_PATH`.
-
-Then, `cons` and `./prepare.sh $SOME_PATH` to deploy the submit directory.
-
-After that, `cd getList` and change bad run list and file list in `conf.py`.
-
-The `nLoc` argument depends on the location of run number in your file list.
-
-For example, for `/star/dataXX/reco/prodXX/XX/PXXiX/20XX/1XX/RUNNUMBER/XX.picoDst.root`, `nLoc` should be `9`.
-
-And then, using `python3 getList` to get the file list without bad runs.
-
-Copy the path to the newly generate `file.list` and paste into `Csubmit.xml`.
-
-Then, `star-submit Csubmit.xml` to submit your jobs.
-
-At last, using `find $SOME_PATH -name "*root" > out.list` to get the file list of Ace Tree root files for further use.
-
-## Advanced usage
-
-You can modify codes in `StRoot`, like some correction or cutoff parameters.
-
-Remember to `cons` every when you modified the codes.
-
-If you want to test your code, prepare a `file.list` in advance, and `root -l -b -q makeFDst.C` after `cons`.
-
-The `maxFilesPerProcess` argument in `Csubmit.xml` can be changed if you want.
-
-If you are prety sure about your file list, (I mean all the files there are valid and accessible), `star-submit -u ie Csubmit.xml` is better than a simple `star-submit Csubmit.xml`.
-
-## Change Log
-o07.04.2024 by yghuang (v4.3):
+07.04.2024 by yghuang (v4.3):
 
 > Now using git submodule
 

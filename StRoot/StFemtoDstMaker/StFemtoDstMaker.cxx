@@ -20,6 +20,7 @@
 #include "StPicoEvent/StPicoTrack.h"
 #include "StPicoEvent/StPicoEvent.h"
 #include "StPicoEvent/StPicoDst.h"
+#include "StPicoEvent/StPicoPhysicalHelix.h"
 #include "StPicoDstMaker/StPicoDstMaker.h"
 #include "StTriggerData.h"
 #include "StTriggerIdCollection.h"
@@ -184,13 +185,16 @@ Int_t StFemtoDstMaker::Make() {
 	}
 
 	// track loop
+	const Float_t mField = event->bField();
 	for (Int_t i = 0; i < nTracks; i++){
 		StPicoTrack *mPicoTrack = mPicoDst->track(i);
 		if (!mPicoTrack) { continue; }
 		if (!mPicoTrack->isPrimary()){ continue; }
 		TVector3 momentum = mPicoTrack->pMom();
-		Float_t dca = fabs(mPicoTrack->gDCA(vx, vy, vz));
-		if (dca > 1.6){ continue; }
+		// Float_t dca = fabs(mPicoTrack->gDCA(vx, vy, vz));
+		StPicoPhysicalHelix helix = picoTrack->helix(mField);
+        Double_t dca = fabs(helix.geometricSignedDistance(pVtx));
+		if (dca > 1.3){ continue; }
 		Float_t nHitsFit = mPicoTrack->nHitsFit();
 		Float_t nHitsMax = mPicoTrack->nHitsMax();
 		Float_t nHitsDedx = mPicoTrack->nHitsDedx();
@@ -220,12 +224,9 @@ Int_t StFemtoDstMaker::Make() {
 		bool bTofGood = true;
 		if (mPicoTrack->isTofTrack()) {
 			StPicoBTofPidTraits* bTofTraits = mPicoDst->btofPidTraits(mPicoTrack->bTofPidTraitsIndex());
-			if (!bTofTraits) {
-				bTofGood = false;
-			}
-			if (bTofTraits->btofMatchFlag() <= 0) {
-				bTofGood = false;
-			}
+			if (!bTofTraits) { bTofGood = false; }
+			if (bTofTraits->btofMatchFlag() <= 0) { bTofGood = false; }
+			if (fabs(bTofTraits->btofYLocal()) >= 1.8) { bTofGood = false; }
 		} else {
 			bTofGood = false;
 		}
@@ -239,12 +240,9 @@ Int_t StFemtoDstMaker::Make() {
 		bool eTofGood = true;
 		if (mPicoTrack->isETofTrack()) {
 			StPicoETofPidTraits* eTofTraits = mPicoDst->etofPidTraits(mPicoTrack->eTofPidTraitsIndex());
-			if (!eTofTraits) {
-				eTofGood = false;
-			}
-			if (eTofTraits->matchFlag() <= 0) {
-				eTofGood = false;
-			}
+			if (!eTofTraits) { eTofGood = false; }
+			if (eTofTraits->matchFlag() <= 0) { eTofGood = false; }
+			// note: for eTOF, there is no Local Y/Z but delta Y/Z, but currently we are not using eTOF...
 		} else {
 			eTofGood = false;
 		}

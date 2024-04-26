@@ -1,5 +1,6 @@
 
 #include <iostream>
+#include <limits>
 #include <cstdio>
 #include <vector>
 #include <utility>
@@ -40,7 +41,7 @@
 #include "StRoot/TpcShiftTool/TpcShiftTool.h"
 #include "StRoot/StCFMult/StCFMult.h"
 #include "StRoot/TriggerTool/TriggerTool.h"
-#include "StRoot/TofT0Correction/TofT0Correction.h"
+#include "StRoot/VtxShiftTool/VtxShiftTool.h"
 
 ClassImp(StFemtoDstMaker)
 StFemtoDstMaker::StFemtoDstMaker(char *name) : StMaker(name) {
@@ -66,7 +67,7 @@ Int_t StFemtoDstMaker::Init(){
 	mtMult = new StCFMult();
 	mtShift = new TpcShiftTool();
 	mtTrg = new TriggerTool();
-	mtTofT0 = new TofT0Correction();
+	mtVtx = new VtxShiftTool();
 
 	// mean dca tool setup
 	mtDca->ReadParams();
@@ -79,8 +80,8 @@ Int_t StFemtoDstMaker::Init(){
 	mtShift->Init();
 	mtMult->ImportShiftTool(mtShift);
 
-	// eTOF t0 correction
-	mtTofT0->SetT0(-0.19); // in case we want to use eTOF...
+	// vertex shift tool
+	mtVtx = new VtxShiftTool();
 
 	return kStOK;
 }
@@ -99,7 +100,7 @@ Int_t StFemtoDstMaker::Make() {
 	}
 
 	StPicoDst *mPicoDst = NULL;
-	mPicoDst = mPicoDstMaker->picoDst();
+	mPicoDst = mPicoDstMaker->mPicoDst();
 	if (!mPicoDst) {
 		fputs("ERROR: StFemtoDstMaker::Init() - Can't get pointer to StPicoDst!", stderr);
 		return kStFATAL;
@@ -120,17 +121,17 @@ Int_t StFemtoDstMaker::Make() {
 	Float_t vy = event->primaryVertex().Y();
 	Float_t vz = event->primaryVertex().Z();
 
-	// new: using Ashish's shifted vr cut
-	// one can find vertex shift information here:
-	// -> https://drupal.star.bnl.gov/STAR/system/files/Vr_xy_N_Vzcut.txt
-	vx = vx - 0.0417;
-	vy = vy + 0.2715;
+	if (fabs(vx) < 1.e-5 && 
+		fabs(vy) < 1.e-5 &&
+		fabs(vz) < 1.e-5) {
+		return kStOK;
+	}
 
 	// wide vertex cut -> tight cut now
 	if (fabs(vz) > 50) {
 		return kStOK;
 	}
-	Float_t vr = TMath::Sqrt(vx * vx + vy * vy);
+	auto vr = mtVtx->GetShiftedVr(vx, vy);
 	if (vr > 1) { // shifted vr < 1
 		return kStOK;
 	}
@@ -154,10 +155,6 @@ Int_t StFemtoDstMaker::Make() {
 	Int_t nTofBeta = mtMult->mNTofBeta;
 
 	Int_t refMult3 = mtMult->mRefMult3;
-	// refMult3 = mtCent->GetRefMult3Corr(
-	// 	refMult, refMult3, nTofMatch, nTofBeta,
-	// 	0, vz, trgid
-	// );
 	refMult3 = mtCent->GetIndianRefMult3Corr(
 		refMult, refMult3, tofMult, nTofMatch, nTofBeta,
 		vz, false
@@ -167,10 +164,6 @@ Int_t StFemtoDstMaker::Make() {
 		refMult, refMult3X, tofMult, nTofMatch, nTofBeta,
 		vz, true
 	);
-	// refMult3X = mtCent->GetRefMult3Corr(
-	// 	refMult, refMult3X, nTofMatch, nTofBeta,
-	// 	0, vz, trgid, true
-	// );
 
 	if (refMult3 < 0) { return kStOK; }
 	if (refMult3X < 0) { return kStOK; }
@@ -208,7 +201,7 @@ Int_t StFemtoDstMaker::Make() {
 		Float_t pt = momentum.Perp();
 		Float_t pcm = momentum.Mag();
 		Float_t eta = momentum.PseudoRapidity();
-		if (pt < 0.3 || pt > 2){ continue; }
+		if (pt <= 0.3 || pt >= 2){ continue; }
 
 		Float_t EP = sqrt(pcm * pcm + 0.938272 * 0.938272);
 		Float_t YP = TMath::Log((EP + pz) / (EP - pz)) * 0.5;
@@ -221,42 +214,38 @@ Int_t StFemtoDstMaker::Make() {
 		StFemtoTrack fTrack;
 
 		// with bTOF
-		bool bTofGood = true;
-		if (mPicoTrack->isTofTrack()) {
-			StPicoBTofPidTraits* bTofTraits = mPicoDst->btofPidTraits(mPicoTrack->bTofPidTraitsIndex());
-			if (!bTofTraits) { bTofGood = false; }
-			if (bTofTraits->btofMatchFlag() <= 0) { bTofGood = false; }
-			if (fabs(bTofTraits->btofYLocal()) >= 1.8) { bTofGood = false; }
-		} else {
-			bTofGood = false;
-		}
-		if (bTofGood) {
-			mtTofT0->ReadBTofTrack(mPicoDst, event, mPicoTrack);
-			mass2 = mtTofT0->GetMass2(0.0, false); // bTOF has 0 t0
-			fTrack.SetETof(0.0);
-		}
-
-		// with eTOF
-		bool eTofGood = true;
-		if (mPicoTrack->isETofTrack()) {
-			StPicoETofPidTraits* eTofTraits = mPicoDst->etofPidTraits(mPicoTrack->eTofPidTraitsIndex());
-			if (!eTofTraits) { eTofGood = false; }
-			if (eTofTraits->matchFlag() <= 0) { eTofGood = false; }
-			// note: for eTOF, there is no Local Y/Z but delta Y/Z, but currently we are not using eTOF...
-		} else {
-			eTofGood = false;
-		}
-		if (eTofGood) {
-			mtTofT0->ReadETofTrack(mPicoDst, event, mPicoTrack);
-			mass2 = mtTofT0->GetMass2(false);
-			fTrack.SetETof(1.0);
-		}
+        Int_t tofId = mPicoTrack->bTofPidTraitsIndex();
+        Int_t btofMatchFlag = 0;
+        Double_t beta = -1.0;
+        Double_t btofYLocal = -999.0;
+        if (tofId >= 0) {
+            StPicoBTofPidTraits* tofPid = mPicoDst->btofPidTraits(tofId);
+            btofMatchFlag = tofPid->btofMatchFlag();
+            if (tofPid) {
+                beta = tofPid->btofBeta();
+                btofYLocal = tofPid->btofYLocal();
+                if (beta < 1e-4) { // recalculate time of flight
+                    Double_t tof = tofPid->btof();
+                    TVector3 btofHitPos = tofPid->btofHitPos();
+                    const StThreeVectorF* btofHitsPosSt = new StThreeVectorF(
+                        btofHitPos.X(), btofHitPos.Y(), btofHitPos.Z()
+                    );
+                    const StThreeVectorF* vtxPosSt = new StThreeVectorF(
+                        vx, vy, vz
+                    );
+                    Double_t L = tofPathLength(vtxPosSt, btofHitsPosSt, helix.curvature());
+                    beta = tof > 0 ? L / (tof * (C_C_LIGHT/1.e9)) : std::numeric_limits<Float_t>::quiet_NaN(); // note: quiet nan will never pass > N or < N
+                }
+            }
+        }
+        if (btofMatchFlag > 0 && beta > 0 && fabs(btofYLocal) < 1.8) {
+            mass2 = pcm * pcm * (pow(1.0 / beta, 2) - 1);
+        }
 
 		fTrack.SetPt(pt*q);
 		fTrack.SetY(YP);
 		fTrack.SetP(pcm);
 		fTrack.SetNHitsFit(nHitsFit);
-		fTrack.SetNHitsDedx(nHitsDedx);
 		fTrack.SetDca(dca);
 		fTrack.SetNSigmaProton(nSigProton);
 		fTrack.SetMass2(mass2);
@@ -269,8 +258,6 @@ Int_t StFemtoDstMaker::Make() {
 	mFemtoEvent->SetRefMult3(refMult3);
 	mFemtoEvent->SetRefMult3X(refMult3X);
 	mFemtoEvent->SetVz(vz);
-	mFemtoEvent->SetVr(vr);
-	mFemtoEvent->SetRunId(runId);
 
 	mFemtoEvent->SetStFemtoTrackArray(trkArray);
 

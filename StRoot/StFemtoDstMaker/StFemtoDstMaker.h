@@ -1,8 +1,3 @@
-/*
-	fDST maker v2.0
-	29.09.2023 by yghuang
-*/
-
 #ifndef ST_FEMTO_DSTMAKER_h
 #define ST_FEMTO_DSTMAKER_h
 
@@ -31,7 +26,7 @@ class MeanDcaTool;
 class CentCorrTool;
 class TpcShiftTool;
 class TriggerTool;
-class TofT0Correction;
+class VtxShiftTool;
 
 //_________________
 class StFemtoDstMaker : public StMaker {
@@ -60,7 +55,7 @@ class StFemtoDstMaker : public StMaker {
 		CentCorrTool* mtCent;
 		TpcShiftTool* mtShift;
 		TriggerTool* mtTrg;
-		TofT0Correction* mtTofT0;
+		VtxShiftTool* mtVtx;
 
 		ClassDef(StFemtoDstMaker,1)
 };

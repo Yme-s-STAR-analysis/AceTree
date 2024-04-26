@@ -32,7 +32,6 @@ class StFemtoTrack : public TObject {
 		Float_t GetDca()			{	return (Float_t) mDca/1000.0;			}
 		Float_t GetNSigmaProton()	{	return ((Float_t)mNSigmaProton)/1000.0;	}
 		Float_t GetMass2()			{	return (Float_t) mMass2/1000.0;			}
-        Float_t IsETofMass2()		{	return mIsETofMass2;					}
 
 
 		//Setters
@@ -44,7 +43,6 @@ class StFemtoTrack : public TObject {
 		void SetDca(Float_t val)	{ 	mDca 		= val*1000;					}
 		void SetNSigmaProton(Float_t val){ mNSigmaProton	= val*1000; 		}
 		void SetMass2(Float_t val)	{ 	mMass2 		= val*1000;					}
-		void SetETof(Float_t val)	{	mIsETofMass2= val;						}
 
 	protected:
 
@@ -56,7 +54,6 @@ class StFemtoTrack : public TObject {
 		Float_t mDca;
 		Float_t mNSigmaProton;
 		Float_t mMass2;
-		Float_t mIsETofMass2;
 
   	ClassDef(StFemtoTrack,1)
 

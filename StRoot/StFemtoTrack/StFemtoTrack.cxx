@@ -8,8 +8,7 @@ ClassImp(StFemtoTrack)
 //___________________________________________________
 StFemtoTrack::StFemtoTrack() : TObject(),
 	mPt(-999), mY(-999), mP(-999), mNHitsFit(-122),
-	mNHitsDedx(-999), mDca(-999),
-	mNSigmaProton(-122), mMass2(-999) {
+	mDca(-999), mNSigmaProton(-122), mMass2(-999) {
 }
 
 //___________________________________________________
@@ -20,7 +19,6 @@ StFemtoTrack::StFemtoTrack(const StFemtoTrack &track) : TObject() {
 	mP = track.mP;
 
 	mNHitsFit = track.mNHitsFit;
-	mNHitsDedx = track.mNHitsDedx;
 	mDca  = track.mDca;
 
 	mNSigmaProton = track.mNSigmaProton;

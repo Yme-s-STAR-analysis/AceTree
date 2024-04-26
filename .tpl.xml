@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<job maxFilesPerProcess="80" simulateSubmission="false">
+<job maxFilesPerProcess="30" simulateSubmission="false">
 
   <SandBox installer="ZIP">
     <Package name="libZip">

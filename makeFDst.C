@@ -19,9 +19,9 @@ void makeFDst(Int_t nEvents = 100000, char *fileList="file.list", char *outDir =
 	gSystem->Load("TpcShiftTool");
 	gSystem->Load("StCFMult");
 	gSystem->Load("CentCorrTool");
-	gSystem->Load("TofT0Correction");
 	gSystem->Load("TriggerTool");
 	gSystem->Load("MeanDcaTool");
+	gSystem->Load("VtxShiftTool");
 
 	// The Main Chain
 	chain = new StChain("StChain");

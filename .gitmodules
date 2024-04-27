@@ -13,6 +13,6 @@
 [submodule "StRoot/TpcShiftTool"]
 	path = StRoot/TpcShiftTool
 	url = https://github.com/Yme-s-STAR-analysis/TpcShiftTool
-[submodule "StRoot/TofT0Correction"]
-	path = StRoot/TofT0Correction
-	url = https://github.com/Yme-s-STAR-analysis/TofT0Correction
+[submodule "StRoot/VtxShiftTool"]
+	path = StRoot/VtxShiftTool
+	url = https://github.com/Yme-s-STAR-analysis/VtxShiftTool

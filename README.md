@@ -1,6 +1,6 @@
 # Ace Tree
 
-Version: 4.4
+Version: 4.5
 
 Author: yghuang
 
@@ -18,7 +18,17 @@ What do you need to modify when dealing with a new data set:
 
 5. in `StRoot/StFemtoDstMaker/StFemtoDstMaker.cxx`, change TOF t0 offset (if necessary)
 
+6. in `StRoot/VtxShiftTool/VtxShiftTool.cxx`, change vx and vy shift
+
 ## Patch Note
+
+27.04.2024 by yghuang (v4.5):
+
+> Vertext shift is now using VtxShiftTool, don't modify source code anymore
+>
+> Template xml file now only use at most 40 files per job
+>
+> TofT0Correction is removed
 
 18.04.2024 by yghuang (v4.4):
 
@@ -78,7 +88,7 @@ What do you need to modify when dealing with a new data set:
 
 2022 Dec. 23rd by yghuang (2.0):
 
-> Updates with newly found issues. 
+> Updates with newly found issues
 
 2021 Nov. 3rd by yghuang (1.0):
 

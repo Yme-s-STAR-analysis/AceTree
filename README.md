@@ -30,6 +30,10 @@ What do you need to modify when dealing with a new data set:
 >
 > TofT0Correction is removed
 
+(v4.5.1):
+
+> Fix a typo
+
 18.04.2024 by yghuang (v4.4):
 
 > Updated bTOF beta and mass2 calculation

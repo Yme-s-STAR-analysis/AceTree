@@ -100,7 +100,7 @@ Int_t StFemtoDstMaker::Make() {
 	}
 
 	StPicoDst *mPicoDst = NULL;
-	mPicoDst = mPicoDstMaker->mPicoDst();
+	mPicoDst = mPicoDstMaker->picoDst();
 	if (!mPicoDst) {
 		fputs("ERROR: StFemtoDstMaker::Init() - Can't get pointer to StPicoDst!", stderr);
 		return kStFATAL;
